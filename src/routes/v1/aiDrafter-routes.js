@@ -74,10 +74,12 @@ router.post("/recommend_question", AiDrafter.RecommendQuestion);
 
 router.post("/create_adira_plan", AiDrafter.createAdiraPlan);
 
-router.get(
-  "/retrive-adira_plan",
-  authMiddleware.checkClientAuth,
-  AiDrafter.retriveAdiraPlan
-);
+router.post("/createPlan", AiDrafter.createPlan);
+
+router.post("/signup", AiDrafter.EnterprisesSignup);
+
+router.post("/login", AiDrafter.EnterprisesLogin);
+
+router.post("/tokenConsume", AiDrafter.tokenConsume);
 
 module.exports = router;

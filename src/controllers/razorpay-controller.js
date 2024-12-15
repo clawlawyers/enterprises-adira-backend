@@ -5,6 +5,8 @@ const {
   OrderService,
   ClientService,
   AdiraOrderService,
+  EnterprisesAdiraService,
+  EnterprisesAdiraOrderService,
 } = require("../services");
 const { ErrorResponse, SuccessResponse } = require("../utils/common");
 const { StatusCodes } = require("http-status-codes");
@@ -346,11 +348,13 @@ async function createPayment(req, res) {
   // const { _id, phoneNumber } = req.body.client;
   console.log(req.body);
 
-  const fetchUser = await ClientService.getClientByPhoneNumber(phoneNumber);
+  const fetchUser = await EnterprisesAdiraService.getUserByPhoneNumber(
+    phoneNumber
+  );
 
   console.log(fetchUser._id.toHexString());
 
-  const order = await AdiraOrderService.createOrder({
+  const order = await EnterprisesAdiraOrderService.createOrder({
     price: amount,
     planName,
     billingCycle,
@@ -383,11 +387,9 @@ async function verifyPayment(req, res) {
     razorpay_payment_id,
     razorpay_signature,
     _id,
-    couponCode,
-    refferalCode,
+    planId,
     createdAt,
     expiresAt,
-    existingSubscription,
     amount,
   } = req.body;
 
@@ -398,22 +400,19 @@ async function verifyPayment(req, res) {
 
   if (generated_signature === razorpay_signature) {
     try {
-      const placedOrder = await AdiraOrderService.updateOrder(_id, {
+      const placedOrder = await EnterprisesAdiraOrderService.updateOrder(_id, {
         paymentStatus: paymentStatus.SUCCESS,
       });
 
       // update the plan for user
       console.log(placedOrder.user.toString(), placedOrder.planName);
 
-      rs = await GptServices.updateUserAdiraPlan(
+      rs = await EnterprisesAdiraService.updateUserAdiraPlan(
         placedOrder.user.toString(),
-        placedOrder.planName,
-        razorpay_order_id,
-        existingSubscription,
+        planId,
         createdAt,
-        refferalCode,
-        couponCode,
         expiresAt,
+        razorpay_order_id,
         amount
       );
       // insert it into user purchase

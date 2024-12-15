@@ -67,18 +67,17 @@ app.use("", (req, res) => {
 // Schedule task to run every minute (for testing purposes)
 cron.schedule("0 1 * * *", async () => {
   console.log("Running scheduled task to handle expired plans");
-  await DbAutomationService.handleExpiredPlans();
-  await DbAutomationService.handleExpiredAdiraPlans();
+  await DbAutomationService.deleteExpiredPlans();
 });
 
 // Call the function immediately to test it
-(async () => {
-  try {
-    await DbAutomationService.handleExpiredAdiraPlans();
-  } catch (error) {
-    console.error("Error removing expired user plans:", error);
-  }
-})();
+// (async () => {
+//   try {
+//     await DbAutomationService.deleteExpiredPlans();
+//   } catch (error) {
+//     console.error("Error removing expired user plans:", error);
+//   }
+// })();
 
 app.listen(ServerConfig.PORT, async () => {
   //mongoDB connection

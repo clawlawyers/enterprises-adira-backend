@@ -15,4 +15,6 @@ module.exports = {
   DbAutomationService: require("./dbAutomation-service"),
   ClientAdiraService: require("./clientAdira-service"),
   AdiraOrderService: require("./adiraOrder-service"),
+  EnterprisesAdiraOrderService: require("./adiraOrder-service"),
+  EnterprisesAdiraService: require("./enterprisesAdira-service"),
 };

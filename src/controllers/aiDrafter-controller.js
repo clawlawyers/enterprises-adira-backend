@@ -10,6 +10,12 @@ const AdiraAdmin = require("../models/adiraAdmin");
 const bcrypt = require("bcrypt");
 const prisma = require("../config/prisma-client");
 const TalkToExpert = require("../models/talkToExpert");
+const EnterprisesUser = require("../models/enterprisesAdiraUser");
+const EnterprisesAdiraPlan = require("../models/enterprisesAdiraPlan");
+const { hashPassword, comparePassword } = require("../utils/coutroom/auth");
+const { createToken } = require("../utils/common/auth");
+const EnterprisesAdiraUserPlan = require("../models/enterprisesAdiraUserPlan");
+const moment = require("moment");
 
 async function uploadDocument(req, res) {
   try {
@@ -1464,6 +1470,150 @@ async function retriveAdiraPlan(req, res) {
   }
 }
 
+async function EnterprisesLogin(req, res) {
+  try {
+    const { username, password } = req.body;
+
+    // Validation check
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ message: "Username and password are required." });
+    }
+
+    // Find user by username
+    const user = await EnterprisesUser.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Check if the password is correct
+    const isPasswordValid = await comparePassword(password, user.password);
+
+    // Compare passwords
+    // const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials." });
+    }
+
+    const token = createToken({ id: user._id, username: user.username });
+
+    const plan = await EnterprisesAdiraUserPlan.findOne({
+      userId: user._id,
+    });
+    res
+      .status(StatusCodes.OK)
+      .json(SuccessResponse({ user: user, token: token, plan }));
+  } catch (error) {
+    res.status(500).json({ message: "Server error.", error: error.message });
+  }
+}
+
+async function createPlan(req, res) {
+  try {
+    const { name, price, totalTokens, duration } = req.body;
+    console.log(name, price, totalTokens, duration);
+    const newPlan = await EnterprisesAdiraPlan.create({
+      name,
+      price,
+      totalTokens,
+      duration,
+    });
+    res.status(201).json(newPlan);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(ErrorResponse({}, error.message));
+  }
+}
+
+async function EnterprisesSignup(req, res) {
+  try {
+    const { username, email, password, mobileNumber } = req.body;
+    const hashedPassword = await hashPassword(password);
+    // Check if user already exists
+    const isDuplicateUser = await EnterprisesUser.findOne({
+      $or: [{ email }, { mobileNumber }, { username }],
+    });
+
+    if (isDuplicateUser) {
+      return res.status(409).json({ message: "User already exists." });
+    }
+    const newUser = await EnterprisesUser.create({
+      username,
+      email,
+      password: hashedPassword,
+      mobileNumber,
+    });
+
+    const token = createToken({ id: newUser._id, username: newUser.username });
+
+    const plan = await EnterprisesAdiraUserPlan.findOne({
+      userId: newUser._id,
+    });
+    res
+      .status(StatusCodes.OK)
+      .json(SuccessResponse({ user: newUser, token: token, plan }));
+  } catch (error) {
+    console.log(error);
+    res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(ErrorResponse({}, error.message));
+  }
+}
+
+async function tokenConsume(req, res) {
+  try {
+    const { _id } = req.body;
+    // Get the current date (without time for comparison)
+    const today = moment().startOf("day").toDate();
+
+    // Find the user's plan for today
+    const userPlan = await EnterprisesAdiraUserPlan.findOne({
+      user: _id,
+      lastUsedDate: { $gte: today }, // Check if the user has already consumed a token today
+    });
+    // If the user has already used a token today, return a message and do nothing
+    if (userPlan) {
+      res
+        .status(StatusCodes.OK)
+        .json(SuccessResponse({ message: "Token already consumed today." }));
+      return;
+    }
+
+    // If no plan exists for today, update the user's plan to consume a token
+    const updatedUserPlan = await EnterprisesAdiraUserPlan.findOneAndUpdate(
+      { user: _id },
+      {
+        $inc: { totalTokenUsed: 1 }, // Increment the token count by 1
+        $set: { lastUsedDate: today }, // Set the last used date to today
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (updatedUserPlan) {
+      res.status(StatusCodes.OK).json(
+        SuccessResponse({
+          message: "Token consumed successfully for today.",
+          updatedUserPlan,
+        })
+      );
+      return;
+    } else {
+      res
+        .status(StatusCodes.OK)
+        .json(SuccessResponse({ message: "User plan not found." }));
+      return;
+    }
+  } catch (error) {
+    console.log(error);
+    res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(ErrorResponse({}, error.message));
+  }
+}
+
 module.exports = {
   uploadDocument,
   createDocument,
@@ -1496,4 +1646,8 @@ module.exports = {
   getpdfpagecount,
   retriveAdiraPlan,
   createAdiraPlan,
+  EnterprisesLogin,
+  createPlan,
+  EnterprisesSignup,
+  tokenConsume,
 };

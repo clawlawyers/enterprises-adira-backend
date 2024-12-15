@@ -4,6 +4,7 @@ const {
   CourtroomService,
   SpecificLawyerCourtroomService,
   ClientAdiraService,
+  EnterprisesAdiraService,
 } = require("../services");
 const { ErrorResponse } = require("../utils/common/");
 const { StatusCodes } = require("http-status-codes");
@@ -34,7 +35,6 @@ async function checkUserAuth(req, res, next) {
 
 async function checkClientAuth(req, res, next) {
   try {
-   
     const token = req.headers["authorization"].split(" ")[1];
     if (!token) {
       throw new AppError("Missing jwt token", StatusCodes.BAD_REQUEST);
@@ -70,6 +70,33 @@ async function checkClientAuth(req, res, next) {
       throw new AppError("No user found", StatusCodes.NOT_FOUND);
     }
     req.body.client = client;
+    next();
+  } catch (error) {
+    const errorResponse = ErrorResponse({}, error.message);
+    return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
+  }
+}
+
+async function checkEnterPrisesAdiraAuth(req, res, next) {
+  try {
+    const token = req.headers["authorization"].split(" ")[1];
+    if (!token) {
+      throw new AppError("Missing jwt token", StatusCodes.BAD_REQUEST);
+    }
+
+    console.log(token);
+
+    const response = verifyToken(token);
+
+    const client = await EnterprisesAdiraService.getUserById(response.id);
+
+    console.log(response);
+    console.log(client);
+
+    if (!client) {
+      throw new AppError("No user found", StatusCodes.NOT_FOUND);
+    }
+    req.user = client;
     next();
   } catch (error) {
     const errorResponse = ErrorResponse({}, error.message);
@@ -201,4 +228,5 @@ module.exports = {
   checkCourtroomAuth,
   checkSpecificLawyerCourtroomAuth,
   checkClientAdiraAuth,
+  checkEnterPrisesAdiraAuth,
 };
