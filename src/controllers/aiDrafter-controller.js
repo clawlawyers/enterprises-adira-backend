@@ -6,9 +6,9 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
-const AdiraAdmin = require("../models/adiraAdmin");
+// const AdiraAdmin = require("../models/adiraAdmin");
 const bcrypt = require("bcrypt");
-const prisma = require("../config/prisma-client");
+// const prisma = require("../config/prisma-client");
 const TalkToExpert = require("../models/talkToExpert");
 const EnterprisesUser = require("../models/enterprisesAdiraUser");
 const EnterprisesAdiraPlan = require("../models/enterprisesAdiraPlan");
@@ -1151,24 +1151,6 @@ async function FetchAiDrafterUploadInputDocument(formData) {
   }
 }
 
-async function AddAdiraAdmin(req, res) {
-  try {
-    const { username, password } = req.body;
-    const salt = await bcrypt.genSalt(10);
-    const encryptedPassword = await bcrypt.hash(password, salt);
-
-    const newAdmin = AdiraAdmin.create({
-      username: username,
-      password: encryptedPassword,
-    });
-
-    return res.status(200).json({ newAdmin });
-  } catch (e) {
-    console.log(e);
-    return res.status(400);
-  }
-}
-
 async function handleFileUpload(req, res) {
   try {
     if (!req.file) {
@@ -1406,69 +1388,69 @@ async function fetchRecommendQuestion({ doc_id }) {
   }
 }
 
-async function createAdiraPlan(req, res) {
-  try {
-    const {
-      name,
-      price,
-      duration,
-      isTypeOfDocument,
-      isPromptDrafting,
-      isUploadOwnDocument,
-      isUploadOwnDocumentWithPrompt,
-      isDownloadWithWaterMark,
-      isSummerizeDocument,
-      isSnippet,
-      isAnalysieAnyDocument,
-    } = req.body;
+// async function createAdiraPlan(req, res) {
+//   try {
+//     const {
+//       name,
+//       price,
+//       duration,
+//       isTypeOfDocument,
+//       isPromptDrafting,
+//       isUploadOwnDocument,
+//       isUploadOwnDocumentWithPrompt,
+//       isDownloadWithWaterMark,
+//       isSummerizeDocument,
+//       isSnippet,
+//       isAnalysieAnyDocument,
+//     } = req.body;
 
-    // Validate inputs (simple validation)
-    if (!name || !price || !duration) {
-      return res
-        .status(400)
-        .json({ error: "Name, price, and duration are required." });
-    }
+//     // Validate inputs (simple validation)
+//     if (!name || !price || !duration) {
+//       return res
+//         .status(400)
+//         .json({ error: "Name, price, and duration are required." });
+//     }
 
-    // Create the new plan
-    const newPlan = await prisma.adiraPlan.create({
-      data: {
-        name,
-        price,
-        duration,
-        isTypeOfDocument,
-        isPromptDrafting,
-        isUploadOwnDocument,
-        isUploadOwnDocumentWithPrompt,
-        isDownloadWithWaterMark,
-        isSummerizeDocument,
-        isSnippet,
-        isAnalysieAnyDocument,
-      },
-    });
+//     // Create the new plan
+//     const newPlan = await prisma.adiraPlan.create({
+//       data: {
+//         name,
+//         price,
+//         duration,
+//         isTypeOfDocument,
+//         isPromptDrafting,
+//         isUploadOwnDocument,
+//         isUploadOwnDocumentWithPrompt,
+//         isDownloadWithWaterMark,
+//         isSummerizeDocument,
+//         isSnippet,
+//         isAnalysieAnyDocument,
+//       },
+//     });
 
-    return res.status(201).json(newPlan);
-  } catch (error) {}
-}
+//     return res.status(201).json(newPlan);
+//   } catch (error) {}
+// }
 
-async function retriveAdiraPlan(req, res) {
-  console.log("hi");
-  const { _id } = req.body.client;
-  try {
-    const plan = await prisma.userAdiraPlan.findFirst({
-      where: {
-        userId: _id,
-      },
-      include: {
-        user: true,
-        plan: true,
-      },
-    });
-    res.status(200).json({ plan });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Failed to retrieve plan." });
-  }
-}
+// async function retriveAdiraPlan(req, res) {
+//   console.log("hi");
+//   const { _id } = req.body.client;
+//   try {
+//     const plan = await prisma.userAdiraPlan.findFirst({
+//       where: {
+//         userId: _id,
+//       },
+//       include: {
+//         user: true,
+//         plan: true,
+//       },
+//     });
+//     res.status(200).json({ plan });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ error: "Failed to retrieve plan." });
+//   }
+// }
 
 async function EnterprisesLogin(req, res) {
   try {
@@ -1638,14 +1620,13 @@ module.exports = {
   getpdf,
   getDocumentPromptRequirements,
   AiDrafterUploadInputDocument,
-  AddAdiraAdmin,
   handleFileUpload,
   AnomalyQuestions,
   TelegramBot,
   RecommendQuestion,
   getpdfpagecount,
-  retriveAdiraPlan,
-  createAdiraPlan,
+  // retriveAdiraPlan,
+  // createAdiraPlan,
   EnterprisesLogin,
   createPlan,
   EnterprisesSignup,

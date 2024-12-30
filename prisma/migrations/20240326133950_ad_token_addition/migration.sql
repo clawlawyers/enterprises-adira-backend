@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Plan" ADD COLUMN     "adToken" INTEGER NOT NULL DEFAULT 0;

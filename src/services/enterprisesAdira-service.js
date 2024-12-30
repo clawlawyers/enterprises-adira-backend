@@ -13,7 +13,7 @@ async function getUserByPhoneNumber(phoneNumber) {
 
 async function getUserById(Id) {
   try {
-    const user = await EnterprisesUser.findById(id);
+    const user = await EnterprisesUser.findById(Id);
     return user;
   } catch (error) {
     console.log(error);

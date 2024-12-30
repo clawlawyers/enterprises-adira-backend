@@ -57,7 +57,7 @@ router.post(
 // Adira Admin routes
 
 // router.get("/addAdmin")
-router.post("/addAdmin", AiDrafter.AddAdiraAdmin);
+// router.post("/addAdmin", AiDrafter.AddAdiraAdmin);
 // router.put("/updateAdmin")
 // router.delete("/deleteAdmin")
 
@@ -72,7 +72,7 @@ router.post("/recommend_question", AiDrafter.RecommendQuestion);
 
 // create a adira plan
 
-router.post("/create_adira_plan", AiDrafter.createAdiraPlan);
+// router.post("/create_adira_plan", AiDrafter.createAdiraPlan);
 
 router.post("/createPlan", AiDrafter.createPlan);
 

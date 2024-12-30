@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Plan" ADD COLUMN     "caseSearchToken" INTEGER NOT NULL DEFAULT 0,
-ADD COLUMN     "gptToken" INTEGER NOT NULL DEFAULT 0;

@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const talkToExpertSchema = new mongoose.Schema({
   client: {
     type: mongoose.Schema.ObjectId,
-    ref: "Client",
+    ref: "EnterprisesUser",
     required: true,
   },
   doc_id: {
